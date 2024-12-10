@@ -13,6 +13,10 @@ from database_connection import SessionLocal, Base, get_db
 from models import User
 from config import fastapi_config
 
+
+# News aggregator function
+from utils import get_news
+
 # Load environment variables
 load_dotenv()
 
@@ -156,3 +160,9 @@ def get_restaurants(zip_code: str, current_user: User = Depends(get_current_user
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
+
+
+@app.get('/get_news')
+async def root():
+    # WIP: Changing the payload information to be more relevant to the small business application
+    return get_news("Find the latest trends in small business technology.")

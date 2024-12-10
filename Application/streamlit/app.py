@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 FASTAPI_BASE_URL = os.getenv('FASTAPI_URL', 'http://localhost:8000')
-
+SERPI_URL = st.secrets["SERPI_URL"]
 if 'token' not in st.session_state:
     st.session_state.token = None
 if 'page' not in st.session_state:
@@ -44,7 +44,7 @@ def main():
         page_selection = global_sidebar()
 
         if page_selection == "Home":
-            show_home_page(FASTAPI_BASE_URL)
+            show_home_page(SERPI_URL)
         elif page_selection == "Restaurants":
             show_restaurants_page(FASTAPI_BASE_URL)
         elif page_selection == "Regulations Q&A":

@@ -1,46 +1,93 @@
 import streamlit as st
 import requests
+import textwrap
+import json
+import os
 
-def show_home_page(api_base_url):
-    st.title(f"Welcome to Restaurant Business Assistant for {st.session_state.selected_city}")
+articles_per_view = 3
+SERPI_URL = st.secrets["SERPI_URL"]
+        
+sample_news_json_name = os.path.join("sample_data", "sample_news_response.json")
 
-    # Fetching news articles related to food, regulations, etc.
-    # Assume you have a FastAPI endpoint that returns a list of news articles.
-    # For demo, we’ll just mock a response.
-    articles = fetch_news_articles(api_base_url, st.session_state.selected_city, st.session_state.token)
+# function to find the file path and read the json file
+def get_news_json_path():
+    current_dir = os.path.dirname(__file__)
+    sample_news_json_path = os.path.join(current_dir, sample_news_json_name)
+    return sample_news_json_path
 
-    if not articles:
-        st.info("No news articles found.")
-    else:
-        for article in articles:
-            st.subheader(article['title'])
-            st.write(article['content'])
+# PRODUCTION
+# @st.cache
+# def get_news(query_str = ""):
+#     try:
+#         # Set and send an ngrok-skip-browser-warning request header with any value.
+#         news_curator_url = f"{SERPI_URL}/get_news"
+#         headers = {"ngrok-skip-browser-warning": "any_value"}
+#         response = requests.get(news_curator_url, headers=headers)
+#         response.raise_for_status()
+#         articles = response.json()
+#     except requests.exceptions.RequestException as e:
+#         st.error(f"Error fetching articles: {e}")
+#         articles = []
+#     return articles
 
-            # Generate summary using LLM (FastAPI endpoint)
-            if st.button(f"Generate Summary for: {article['title']}"):
-                summary = generate_article_summary(api_base_url, article['id'], st.session_state.token)
-                st.write("**Summary:**")
-                st.write(summary)
 
 
-def fetch_news_articles(api_base_url, city, token):
-    # Placeholder: You would implement an endpoint in FastAPI to fetch articles.
-    # For now, we return a static list.
-    headers = {"Authorization": f"Bearer {token}"} if token else {}
-    # response = requests.get(f"{api_base_url}/news?city={city}", headers=headers)
-    # if response.status_code == 200:
-    #     return response.json()
+# Testing for local 
+# comment in production
+def get_news():
+    with open(get_news_json_path(), "r") as f:
+        articles = json.load(f)
+    return articles
 
-    return [
-        {"id": 1, "title": f"New Food Trend in {city}", "content": "Chefs in the city are experimenting with new vegan dishes..."},
-        {"id": 2, "title": f"Government Update on Regulations in {city}", "content": "The local government introduced new sanitary measures..."}
-    ]
 
-def generate_article_summary(api_base_url, article_id, token):
-    # Placeholder for a summary endpoint
-    headers = {"Authorization": f"Bearer {token}"} if token else {}
-    # response = requests.post(f"{api_base_url}/article_summary", json={"article_id": article_id}, headers=headers)
-    # if response.status_code == 200:
-    #     return response.json().get("summary", "No summary available")
 
-    return "This is a mock summary for demonstration purposes."
+def display_row_news(articles = [], start_index = 0, articles_per_view = 3):
+    cont = st.container()
+    with cont:
+        cols = st.columns(articles_per_view)
+
+        for i in range(articles_per_view):
+            article_index = start_index + i
+            if article_index < len(articles):
+                article = articles[article_index]
+
+                # Truncate title and summary
+                truncated_title = textwrap.shorten(article["title"], width=50, placeholder="...")
+                truncated_summary = textwrap.shorten(article["article_summary"], width=100, placeholder="...")
+
+                image_height = "200px"
+                backup_image = "https://www.businessnewsdaily.com/_next/image?url=https%3A%2F%2Fimages.businessnewsdaily.com%2Fapp%2Fuploads%2F2019%2F05%2F14131923%2Fonline-reselling.png&w=3840&q=75"
+                display_picture = article.get("display_picture", backup_image)
+                if not display_picture:
+                    display_picture = backup_image
+                with cols[i]:
+                    st.markdown(
+                        f"""
+                        <div style="border:1px solid #ccc; border-radius:5px; padding:10px; text-align:center;">
+                            <a href="{article["article_link"]}" target="_blank" style="text-decoration:none; color:inherit;">
+                                <img src="{display_picture}" 
+                                     style="width:100%; height:{image_height}; object-fit:cover; border-radius:5px; margin-bottom:10px;" />
+                                <h3 style="margin:10px 0; font-size:1.1em;">{truncated_title}</h3>
+                            </a>
+                            <p style="font-size:0.9em; color:#555;">{truncated_summary}</p>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
+
+def show_home_page(api_base_url=SERPI_URL):
+    st.title(f"Welcome to Restaurant Business Assistant")
+    st.write(f"Curated news for you")
+    
+    news_curator = st.container(border=True)
+    with news_curator:
+        # query_str=st.text_input("Enter the query string")
+        articles = get_news()
+
+        # Calculate the maximum starting index we can show without going out of range
+        import math
+        max_num_of_rows = max(1, math.ceil(len(articles) / articles_per_view))
+        for row_num in range(max_num_of_rows):
+            start_index = row_num * articles_per_view
+            display_row_news(articles, start_index, articles_per_view)
