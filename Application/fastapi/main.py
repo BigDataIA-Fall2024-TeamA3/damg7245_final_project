@@ -7,6 +7,8 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
+import openai
+from pinecone import Pinecone, ServerlessSpec
 
 # Import your database, models, and authentication utilities
 from database_connection import SessionLocal, Base, get_db
@@ -30,10 +32,25 @@ app.add_middleware(
 SECRET_KEY = fastapi_config.SECRET_KEY
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
-
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
-if not GOOGLE_API_KEY:
-    raise RuntimeError("GOOGLE_MAPS_API_KEY not set in environment")
+openai.api_key = OPENAI_API_KEY
+
+pc = Pinecone(api_key=PINECONE_API_KEY)
+if PINECONE_INDEX_NAME not in pc.list_indexes().names():
+    pc.create_index(
+        name=PINECONE_INDEX_NAME,
+        dimension=1536,
+        metric='cosine',
+        spec=ServerlessSpec(cloud='aws', region='us-east-1'),
+    )
+index = pc.Index(PINECONE_INDEX_NAME)
+
+if not all([SECRET_KEY, GOOGLE_API_KEY, PINECONE_API_KEY, PINECONE_INDEX_NAME, OPENAI_API_KEY]):
+    raise RuntimeError("Missing required environment variables.")
+
 
 # Example: If you have OAuth2PasswordBearer for user authentication
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -144,6 +161,55 @@ def find_restaurants(lat: float, lng: float, radius_meters: int = 8047) -> List[
             return restaurants
     return []
 
+class Query(BaseModel):
+    question: str
+
+@app.post("/ask")
+def ask_question(query: Query, current_user: User = Depends(get_current_user)):
+    """
+    Endpoint to answer questions based on Massachusetts food regulations.
+    """
+    try:
+        # Generate embedding
+        embedding_response = openai.Embedding.create(
+            model="text-embedding-ada-002", input=query.question
+        )
+        embedding_vector = embedding_response['data'][0]['embedding']
+
+        # Query Pinecone
+        response = index.query(
+            vector=embedding_vector,
+            top_k=5,
+            include_metadata=True,
+        )
+
+        matches = response.get('matches', [])
+        if not matches:
+            raise HTTPException(status_code=404, detail="No relevant data found in the database.")
+
+        # Extract context
+        contexts = [match['metadata']['content'] for match in matches]
+        combined_context = " ".join(contexts)
+
+        # Generate response using OpenAI
+        completion = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": """
+                    You are an expert in Massachusetts food regulation laws. Your responses should strictly
+                    be based on the provided context. When answering, refer to all relevant regulations
+                    related to the user's query. Include regulation titles, codes, and explanations.
+                """},
+                {"role": "user", "content": f"Context: {combined_context}\n\n{query.question}"},
+            ],
+        )
+
+        answer = completion['choices'][0]['message']['content']
+        return {"answer": answer}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
 @app.get("/restaurants")
 def get_restaurants(zip_code: str, current_user: User = Depends(get_current_user)):
     coords = geocode_zip_code(zip_code)
