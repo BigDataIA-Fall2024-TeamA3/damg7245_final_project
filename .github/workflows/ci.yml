@@ -1,9 +1,11 @@
 name: Damg
 on:
-  push
+  push:
+    branches:
+      - [main, test]
 job:
   build:
-    name: Code
+    name: Code-integration
     runs-on: ubuntu-latest
 
     steps:
