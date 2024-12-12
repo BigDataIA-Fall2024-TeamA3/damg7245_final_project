@@ -16,5 +16,14 @@ jobs:
         run: |
           cd Application && \
           echo "${{ secrets.ENTIRE_ENV }}" > .env
+      - name: Docker Intsall
+        uses: docker-practice/actions-setup-docker@master
+        timeout-minutes: 12
+        run: |
+          set -x
+
+          docker version
+
+          docker compose up --build
 
 
