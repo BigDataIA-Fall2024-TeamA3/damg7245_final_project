@@ -1,0 +1,11 @@
+name: Damg
+on:
+  push
+job:
+  build:
+    name: Code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
