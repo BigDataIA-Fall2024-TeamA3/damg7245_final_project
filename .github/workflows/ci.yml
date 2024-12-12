@@ -13,3 +13,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        
+      - name: Print Directory
+        run: ls -al
