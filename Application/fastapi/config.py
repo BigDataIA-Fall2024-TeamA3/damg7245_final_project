@@ -1,4 +1,4 @@
-#config
+# damg7245_final_project/Application/fastapi/config.py
 import os
 from dotenv import load_dotenv
 
@@ -17,8 +17,6 @@ class Config:
     SNOWFLAKE_DATABASE=os.getenv('SNOWFLAKE_DATABASE')
     SNOWFLAKE_SCHEMA=os.getenv('SNOWFLAKE_SCHEMA')
     SNOWFLAKE_ROLE=os.getenv('SNOWFLAKE_ROLE')
-    ZILLIZ_CLOUD_URI=os.getenv('ZILLIZ_CLOUD_URI')
-    ZILLIZ_CLOUD_API_KEY=os.getenv('ZILLIZ_CLOUD_API_KEY')
     FASTAPI_URL=os.getenv('FASTAPI_URL')
     DATABASE_URL=os.getenv('DATABASE_URL')
     SECRET_KEY=os.getenv('SECRET_KEY')

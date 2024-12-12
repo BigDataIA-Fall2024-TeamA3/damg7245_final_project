@@ -1,3 +1,5 @@
+# damg7245_final_project/Application/streamlit/pagess/regulations.py
+
 import streamlit as st
 import requests
 from io import BytesIO
