@@ -23,7 +23,6 @@ snowflake-connector-python==3.12.3
 pandas
 tiktoken
 altair==4.1.0
-sqlalchemy
 python-jose
 bcrypt==4.0.1
 passlib
@@ -31,7 +30,6 @@ psycopg2
 python-multipart
 newsapi-python==0.2.7
 python-dotenv==1.0.1
-# langchain-community==0.3.10
 serpapi==0.1.5
 google-search-results==2.4.2
 anthropic
@@ -40,3 +38,5 @@ newspaper3k
 lxml-html-clean
 date-guesser
 langdetect
+openai==0.28
+pinecone-client

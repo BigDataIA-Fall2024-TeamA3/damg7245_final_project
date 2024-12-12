@@ -13,8 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 WORKDIR /app
 
 # Install dependencies for the part that needs llama-index-core and openai >= 1.1.0
-COPY requirements1.txt .
-RUN pip install --no-cache-dir -r requirements1.txt
+# COPY requirements1.txt .
+# RUN pip install --no-cache-dir -r requirements1.txt
 
 COPY . .
 
