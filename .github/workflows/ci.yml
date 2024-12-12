@@ -21,3 +21,7 @@ jobs:
         run: |
           cd Application
           printf "%s" "${{ secrets.ENTIRE_ENV }}" > .env
+
+      - name: Docker Install
+        uses: docker-practice/actions-setup-docker@master
+        timeout-minutes: 12
