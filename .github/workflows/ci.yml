@@ -25,3 +25,12 @@ jobs:
       - name: Docker Install
         uses: docker-practice/actions-setup-docker@master
         timeout-minutes: 12
+
+      - name: Docker Compose Build
+        run: |
+          cd Application
+          set -x
+
+          docker version
+
+          docker compose build
