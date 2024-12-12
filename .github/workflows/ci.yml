@@ -39,4 +39,4 @@ jobs:
 
           docker version
 
-          docker compose up --build
+          docker compose build
