@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+      - test
+      
 
 jobs: 
   build:
@@ -22,23 +24,23 @@ jobs:
           cd Application
           printf "%s" "${{ secrets.ENTIRE_ENV }}" > .env
 
-      - name: Docker Install
-        uses: docker-practice/actions-setup-docker@master
-        timeout-minutes: 12
+      # - name: Docker Install
+      #   uses: docker-practice/actions-setup-docker@master
+      #   timeout-minutes: 12
 
-      - name: Docker System Cleanup (Prevent Disk Space Errors)
-        run: |
-          docker system prune -af --volumes
-          docker builder prune --all --force
+      # - name: Docker System Cleanup (Prevent Disk Space Errors)
+      #   run: |
+      #     docker system prune -af --volumes
+      #     docker builder prune --all --force
 
-      - name: Docker Compose Build
-        run: |
-          cd Application
-          set -x
+      # - name: Docker Compose Build
+      #   run: |
+      #     cd Application
+      #     set -x
 
-          docker version
+      #     docker version
 
-          docker compose build
+      #     docker compose build
       - name: Configure AWS CLI
         run: |
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
