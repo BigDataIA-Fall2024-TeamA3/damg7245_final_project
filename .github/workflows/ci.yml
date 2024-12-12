@@ -2,8 +2,9 @@ name: Damg
 on:
   push:
     branches:
-      - [main, test]
-job:
+      - main
+      - test
+jobs: # 'jobs' should be plural
   build:
     name: Code-integration
     runs-on: ubuntu-latest
