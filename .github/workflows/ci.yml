@@ -12,22 +12,27 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
       - name: Print Directory
         run: ls -al
+
       - name: Create env
         run: |
           cd Application && \
           printf "%s" "${{ secrets.ENTIRE_ENV }}" > .env
-      - name: Docker Intsall
+
+      - name: Docker Install
         uses: docker-practice/actions-setup-docker@master
         timeout-minutes: 12
+
+      - name: Free Disk Space
+        run: docker system prune -af
+
       - name: Docker Compose Build
         run: |
           cd Application && \
-          set -x
-
           docker version && \
+          docker compose up --build --no-cache
 
-          docker compose up --build
-
-
+      - name: Cleanup
+        run: docker compose down
