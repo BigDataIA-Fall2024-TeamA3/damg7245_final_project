@@ -1,15 +1,16 @@
+# damg7245_final_project/Application/streamlit/app.py
 import streamlit as st
-from pages.login import show_login_page
-from pages.home import show_home_page
-from pages.restaurants import show_restaurants_page
-from pages.regulations import show_regulations_page
-from pages.qn import show_qn_page
+from pagess.login import show_login_page
+from pagess.home import show_home_page
+from pagess.restaurants import show_restaurants_page
+from pagess.regulations import show_regulations_page
+from pagess.qn import show_qn_page
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 FASTAPI_BASE_URL = os.getenv('FASTAPI_URL', 'http://localhost:8000')
-
+SERPI_URL = os.getenv("SERPI_URL")
 if 'token' not in st.session_state:
     st.session_state.token = None
 if 'page' not in st.session_state:
@@ -44,11 +45,14 @@ def main():
         page_selection = global_sidebar()
 
         if page_selection == "Home":
-            show_home_page(FASTAPI_BASE_URL)
+            st.write(SERPI_URL)
+            print("API : ", SERPI_URL)
+            show_home_page(SERPI_URL)
+            # show_home_page(FASTAPI_BASE_URL)
         elif page_selection == "Restaurants":
             show_restaurants_page(FASTAPI_BASE_URL)
         elif page_selection == "Regulations Q&A":
-            show_regulations_page(FASTAPI_BASE_URL, st.session_state.zip_code)
+            show_regulations_page(FASTAPI_BASE_URL)
         elif page_selection == "Q&N":
             show_qn_page(FASTAPI_BASE_URL, st.session_state.zip_code)
 

@@ -1,4 +1,4 @@
-# utils/s3_utils.py
+# damg7245_final_project/Application/fastapi/utils/s3_utils.py
 
 import boto3
 from botocore.exceptions import ClientError
