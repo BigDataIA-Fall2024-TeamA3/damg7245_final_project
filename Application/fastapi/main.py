@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from dotenv import load_dotenv
 import openai
 from pinecone import Pinecone, ServerlessSpec
+from pydantic import BaseModel
 
 # Import your database, models, and authentication utilities
 from database_connection import SessionLocal, Base, get_db
@@ -169,7 +170,7 @@ class Query(BaseModel):
     question: str
 
 @app.post("/ask")
-def ask_question(query: Query, current_user: User = Depends(get_current_user)):
+def ask_question(query: Query):
     """
     Endpoint to answer questions based on Massachusetts food regulations.
     """

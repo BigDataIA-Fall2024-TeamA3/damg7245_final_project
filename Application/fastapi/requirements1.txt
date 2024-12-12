@@ -1,2 +1,5 @@
 openai==0.28
 pinecone-client
+# pydantic==2.10.3
+# langchain==0.3.10
+# langgraph==0.2.56

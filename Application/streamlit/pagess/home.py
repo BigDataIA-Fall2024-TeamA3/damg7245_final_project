@@ -5,7 +5,7 @@ import json
 import os
 
 articles_per_view = 3
-SERPI_URL = st.secrets["SERPI_URL"]
+SERPI_URL = os.getenv("SERPI_URL")
         
 sample_news_json_name = os.path.join("sample_data", "sample_news_response.json")
 
@@ -17,27 +17,27 @@ def get_news_json_path():
 
 # PRODUCTION
 # @st.cache
-# def get_news(query_str = ""):
-#     try:
-#         # Set and send an ngrok-skip-browser-warning request header with any value.
-#         news_curator_url = f"{SERPI_URL}/get_news"
-#         headers = {"ngrok-skip-browser-warning": "any_value"}
-#         response = requests.get(news_curator_url, headers=headers)
-#         response.raise_for_status()
-#         articles = response.json()
-#     except requests.exceptions.RequestException as e:
-#         st.error(f"Error fetching articles: {e}")
-#         articles = []
-#     return articles
+def get_news(query_str = ""):
+    try:
+        # Set and send an ngrok-skip-browser-warning request header with any value.
+        news_curator_url = f"{SERPI_URL}/get_news"
+        headers = {"ngrok-skip-browser-warning": "any_value"}
+        response = requests.get(news_curator_url, headers=headers)
+        response.raise_for_status()
+        articles = response.json()
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching articles: {e}")
+        articles = []
+    return articles
 
 
 
 # Testing for local 
 # comment in production
-def get_news():
-    with open(get_news_json_path(), "r") as f:
-        articles = json.load(f)
-    return articles
+# def get_news():
+#     with open(get_news_json_path(), "r") as f:
+#         articles = json.load(f)
+#     return articles
 
 
 
