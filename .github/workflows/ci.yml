@@ -13,6 +13,11 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        
+
       - name: Print Directory
         run: ls -al
+
+      - name: Create .env File
+        run: |
+          cd Application
+          printf "%s" "${{ secrets.ENTIRE_ENV }}" > .env
