@@ -25,6 +25,12 @@ jobs:
       - name: Docker Install
         uses: docker-practice/actions-setup-docker@master
         timeout-minutes: 12
+        
+      - name: Docker System Cleanup (Prevent Disk Space Errors)
+        run: |
+          docker system prune -af --volumes
+          docker builder prune --all --force
+
 
       - name: Docker Compose Build
         run: |
