@@ -23,6 +23,7 @@ jobs:
         timeout-minutes: 12
       - name: Docker Compose Build
         run: |
+          cd Application \
           set -x
 
           docker version
