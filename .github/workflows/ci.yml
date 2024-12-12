@@ -1,0 +1,15 @@
+name: Damg
+
+on:
+  push:
+    branches:
+      - main
+     
+jobs: 
+  build:
+    name: Code-integration-deployment
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
