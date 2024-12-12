@@ -4,7 +4,7 @@ on:
     branches:
       - main
       - test
-jobs: # 'jobs' should be plural
+jobs: 
   build:
     name: Code-integration
     runs-on: ubuntu-latest
@@ -12,3 +12,9 @@ jobs: # 'jobs' should be plural
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+      - name: Create env
+        runs: |
+          cd Application \
+          echo "${{ secrets.ENTIRE_ENV }}" > .env
+
+
