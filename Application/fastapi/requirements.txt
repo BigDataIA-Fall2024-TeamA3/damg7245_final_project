@@ -9,14 +9,11 @@ requests==2.32.3
 frontend==0.0.3
 python-multipart==0.0.16
 boto3
-python-multipart
-python-dotenv
+python-dotenv==1.0.1
 pydantic
 llama-index
 transformers
 torch
-Pillow
-python-pptx
 pdf2image
 pytesseract
 snowflake-connector-python==3.12.3
@@ -27,9 +24,7 @@ python-jose
 bcrypt==4.0.1
 passlib
 psycopg2
-python-multipart
 newsapi-python==0.2.7
-python-dotenv==1.0.1
 serpapi==0.1.5
 google-search-results==2.4.2
 anthropic
