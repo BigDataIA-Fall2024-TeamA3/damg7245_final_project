@@ -12,9 +12,11 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+      - name: Print Directory
+        uses: ls -al
       - name: Create env
         run: |
-          cd /Application && \
+          cd Application && \
           echo "${{ secrets.ENTIRE_ENV }}" > .env
       - name: Docker Intsall
         uses: docker-practice/actions-setup-docker@master
