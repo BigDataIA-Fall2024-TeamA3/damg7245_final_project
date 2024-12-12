@@ -3,7 +3,7 @@ name: Damg
 on:
   push:
     branches:
-      - main
+      - workflow
      
 jobs: 
   build:
