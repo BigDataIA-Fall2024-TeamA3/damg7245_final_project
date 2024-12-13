@@ -98,10 +98,11 @@ jobs:
           docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:fastapi-app-latest
 
 
-          docker stop $(docker ps -q --filter ancestor=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:streamlit-app-latest) || true
-          docker stop $(docker ps -q --filter ancestor=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:fastapi-app-latest) || true
-          docker rm $(docker ps -a -q --filter ancestor=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:streamlit-app-latest) || true
-          docker rm $(docker ps -a -q --filter ancestor=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:fastapi-app-latest) || true
+          docker ps -q --filter "ancestor=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:streamlit-app-latest" | xargs -r docker stop
+          docker ps -q --filter "ancestor=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:fastapi-app-latest" | xargs -r docker stop
+
+          docker ps -a -q --filter "ancestor=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:streamlit-app-latest" | xargs -r docker rm
+          docker ps -a -q --filter "ancestor=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:fastapi-app-latest" | xargs -r docker rm
 
           
 
