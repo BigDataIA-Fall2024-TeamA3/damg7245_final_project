@@ -52,7 +52,7 @@ def main():
         page_selection = global_sidebar()
 
         if page_selection == "Home":
-            st.write(SERPI_URL)
+            # st.write(SERPI_URL)
             show_home_page(SERPI_URL)
         elif page_selection == "Restaurants":
             show_restaurants_page(FASTAPI_BASE_URL)
