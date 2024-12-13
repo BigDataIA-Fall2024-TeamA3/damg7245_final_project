@@ -64,6 +64,8 @@ jobs:
         run: |
           echo "${{ secrets.EC2_KEY }}" > private_key.pem
           chmod 600 private_key.pem
+      - name: Verify .env File Exists
+        run: ls -al
 
       - name: Copy .env File to EC2
         run: |
