@@ -2,7 +2,7 @@
 # Final Project - Business Assistant Application
 
 ## Live application Links
-[![codelabs](https://codelabs-preview.appspot.com/?file_id=1biLqN77C3DeM3uWuIz82lfHAJdetSz37mRf4Me9qksw#0)
+[![new codelabs](https://img.shields.io/badge/codelabs-4285F4?style=for-the-badge&logo=codelabs&logoColor=white)](https://codelabs-preview.appspot.com/?file_id=1biLqN77C3DeM3uWuIz82lfHAJdetSz37mRf4Me9qksw#0)
 
 - Fast API: http://18.209.251.244:8000/docs
 - Streamlit Application: http://18.209.251.244:8501/
