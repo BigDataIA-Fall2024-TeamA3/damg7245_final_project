@@ -108,6 +108,9 @@ jobs:
 
           docker run -d -p 8080:8501 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:streamlit-app-latest
           docker run -d -p 4000:8000 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:fastapi-app-latest
+          ssh -i private_key.pem ec2-user@${{ secrets.EC2_PUBLIC_IP }}
+          docker ps
+
           EOF
           
         
