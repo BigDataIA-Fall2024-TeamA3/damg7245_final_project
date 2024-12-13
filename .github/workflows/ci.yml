@@ -94,8 +94,8 @@ jobs:
           aws configure set region ${{ secrets.AWS_REGION }}
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
           
-          fuser -k 4000/tcp
-          fuser -k 8080/tcp
+          lsof -ti :4000 | xargs kill -9
+          lsof -ti :8080 | xargs kill -9
 
           docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:fastapi-app-latest
           docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:streamlit-app-latest
