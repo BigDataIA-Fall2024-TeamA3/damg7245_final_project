@@ -1,17 +1,14 @@
-#fastapi/requirements.txt
-fastapi==0.95.1
+# fastapi/requirements.txt
+fastapi==0.100.0
 uvicorn==0.22.0
-pymupdf==1.24.10
-streamlit==1.38.0
-python-pptx==1.0.2
-Pillow==10.4.0
 requests==2.32.3
 frontend==0.0.3
 python-multipart==0.0.16
 boto3
-python-dotenv==1.0.1
-pydantic
-snowflake-connector-python==3.12.3
+python-multipart
+python-dotenv
+pydantic==2.7.4
+snowflake-connector-python==3.12.4
 pandas
 tiktoken
 altair==4.1.0
@@ -23,9 +20,11 @@ newsapi-python==0.2.7
 serpapi==0.1.5
 google-search-results==2.4.2
 requests-cache
-newspaper3k
 lxml-html-clean
 date-guesser
 langdetect
-openai==0.28
 pinecone-client
+openai==1.57.2
+langchain-openai==0.2.5
+langchain==0.3.0
+langchain_community

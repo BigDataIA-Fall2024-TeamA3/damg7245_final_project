@@ -289,33 +289,6 @@ services:
       airflow-init:
         condition: service_completed_successfully
   
-#   streamlit:
-#     build:
-#       context: ./streamlit
-#       dockerfile: Dockerfile
-#     ports:
-#       - "8501:8501"
-#     env_file:
-#       - .env 
-#     networks:
-#       - app-network
-#     depends_on:
-#       - fastapi
-
-#   fastapi:
-#     build:
-#       context: ./fastapi
-#       dockerfile: Dockerfile
-#     ports:
-#       - "8000:8000"
-#     env_file:
-#       - .env 
-#     networks:
-#       - app-network
-# networks:
-#   app-network:
-#     driver: bridge
-  
 volumes:
   postgres-db-volume:
 

@@ -20,5 +20,5 @@ class Config:
     FASTAPI_URL=os.getenv('FASTAPI_URL')
     DATABASE_URL=os.getenv('DATABASE_URL')
     SECRET_KEY=os.getenv('SECRET_KEY')
-
+    TAVILY_API_KEY=os.getenv('TAVILY_API_KEY')
 fastapi_config = Config()
