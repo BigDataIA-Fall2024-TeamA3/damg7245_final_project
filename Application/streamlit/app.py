@@ -9,7 +9,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-FASTAPI_BASE_URL = os.getenv('FASTAPI_URL', 'http://localhost:8000')
+FASTAPI_BASE_URL = os.getenv('FASTAPI_URL', 'http://localhost:4000')
 SERPI_URL = os.getenv("SERPI_URL")
 if 'token' not in st.session_state:
     st.session_state.token = None
