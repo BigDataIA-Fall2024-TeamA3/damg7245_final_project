@@ -15,4 +15,4 @@ COPY . .
 RUN pip install python-dotenv
 
 # Run the Streamlit app
-CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.enableCORS=false"]
+CMD ["streamlit", "run", "app.py", "--server.port=8080", "--server.enableCORS=false"]

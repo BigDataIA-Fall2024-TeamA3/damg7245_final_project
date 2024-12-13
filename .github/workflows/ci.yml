@@ -1,0 +1,118 @@
+name: Damg
+
+on:
+  push:
+    branches:
+      - main
+     
+jobs: 
+  build:
+    name: Code-integration-deployment
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Print Directory
+        run: ls -al
+
+      - name: Create .env File
+        run: |
+          cd Application
+          printf "%s" "${{ secrets.ENTIRE_ENV }}" > .env
+
+      - name: Docker Install
+        uses: docker-practice/actions-setup-docker@master
+        timeout-minutes: 12
+        
+      - name: Docker System Cleanup (Prevent Disk Space Errors)
+        run: |
+          docker system prune -af --volumes
+          docker builder prune --all --force
+
+
+      - name: Docker Compose Build
+        run: |
+          cd Application
+          set -x
+
+          docker version
+
+          docker compose build
+
+
+      - name: Configure AWS CLI 
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region ${{ secrets.AWS_REGION }}
+
+      - name: Login to ECR  
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+      - name: Tag and Push Docker Images to ECR  
+        run: |         
+          
+          # Tag and push FastAPI app
+          docker tag fastapi-app:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:fastapi-app-latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:fastapi-app-latest
+          # Tag and push Streamlit app
+          docker tag streamlit-app:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:streamlit-app-latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:streamlit-app-latest
+
+      - name: Create SSH Key File
+        run: |
+          echo "${{ secrets.EC2_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+      - name: Verify .env File Exists
+        run: ls -al
+
+      - name: Copy .env File to EC2
+        run: |
+          scp -i private_key.pem -o StrictHostKeyChecking=no Application/.env ec2-user@${{ secrets.EC2_PUBLIC_IP }}:/home/ec2-user/
+
+
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+          # Install Docker if not already installed
+          if ! [ -x "$(command -v docker)" ]; then
+            echo "Docker not found. Installing Docker..."
+            sudo yum update -y
+            sudo yum install -y docker
+            sudo service docker start
+            sudo usermod -aG docker ec2-user
+          else
+            echo "Docker is already installed."
+          fi
+          echo "Cleaning up Docker..."
+          docker system prune -af --volumes
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region ${{ secrets.AWS_REGION }}
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+          
+          lsof -ti :4000 | xargs kill -9
+          lsof -ti :8080 | xargs kill -9
+
+          docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:fastapi-app-latest
+          docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:streamlit-app-latest
+
+          docker ps -q --filter "ancestor=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:fastapi-app-latest" | xargs -r docker stop
+          docker ps -q --filter "ancestor=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:streamlit-app-latest" | xargs -r docker stop
+        
+
+          ocker ps -a -q --filter "ancestor=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:fastapi-app-latest" | xargs -r docker rm
+          docker ps -a -q --filter "ancestor=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:streamlit-app-latest" | xargs -r docker rm
+
+          
+          docker run -d -p 4000:8000 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:fastapi-app-latest
+          docker run -d -p 8080:8501 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:streamlit-app-latest
+          ssh -i private_key.pem ec2-user@${{ secrets.EC2_PUBLIC_IP }}
+          docker ps
+
+          EOF
+          
+        
