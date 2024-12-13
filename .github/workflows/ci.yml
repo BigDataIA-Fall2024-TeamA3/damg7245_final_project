@@ -75,33 +75,34 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
-          # Define variables
-          echo 'AFTER SSH'
-          pwd
-          STREAMLIT_IMAGE=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}/streamlit-app:latest
-          FASTAPI_IMAGE=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}/fastapi-app:latest
-          STREAMLIT_PORT=8501
-          FASTAPI_PORT=8000
+          # Install Docker if not already installed
+          if ! [ -x "$(command -v docker)" ]; then
+            echo "Docker not found. Installing Docker..."
+            sudo yum update -y
+            sudo yum install -y docker
+            sudo service docker start
+            sudo usermod -aG docker ec2-user
+          else
+            echo "Docker is already installed."
+          fi
 
-          # Pull the latest images
-          docker pull \$STREAMLIT_IMAGE
-          docker pull \$FASTAPI_IMAGE
+          newgrp docker <<DOCKER_COMMANDS
 
-          # Stop and remove existing containers
-          docker ps -q --filter "ancestor=\$STREAMLIT_IMAGE" | xargs -r docker stop
-          docker ps -q --filter "ancestor=\$FASTAPI_IMAGE" | xargs -r docker stop
+            STREAMLIT_IMAGE=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}/streamlit-app:latest
+            FASTAPI_IMAGE=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}/fastapi-app:latest
+            STREAMLIT_PORT=8501
+            FASTAPI_PORT=8000
 
-          docker ps -a -q --filter "ancestor=\$STREAMLIT_IMAGE" | xargs -r docker rm
-          docker ps -a -q --filter "ancestor=\$FASTAPI_IMAGE" | xargs -r docker rm
+            docker pull \$STREAMLIT_IMAGE
+            docker pull \$FASTAPI_IMAGE
 
-          # Start new containers
-          docker run -d --env-file /home/ec2-user/.env -p \$STREAMLIT_PORT:8501 \$STREAMLIT_IMAGE
-          docker run -d --env-file /home/ec2-user/.env -p \$FASTAPI_PORT:8000 \$FASTAPI_IMAGE
+            docker ps -q --filter "ancestor=\$STREAMLIT_IMAGE" | xargs -r docker stop
+            docker ps -q --filter "ancestor=\$FASTAPI_IMAGE" | xargs -r docker stop
 
+            docker ps -a -q --filter "ancestor=\$STREAMLIT_IMAGE" | xargs -r docker rm
+            docker ps -a -q --filter "ancestor=\$FASTAPI_IMAGE" | xargs -r docker rm
+
+            docker run -d --env-file /home/ec2-user/.env -p \$STREAMLIT_PORT:8501 \$STREAMLIT_IMAGE
+            docker run -d --env-file /home/ec2-user/.env -p \$FASTAPI_PORT:8000 \$FASTAPI_IMAGE
+          DOCKER_COMMANDS
           EOF
-
-
-
-          
-          
-
