@@ -7,8 +7,7 @@ import json
 import os
 
 articles_per_view = 3
-SERPI_URL = os.getenv("SERPI_URL")
-        
+SERPI_URL = st.secrets["SERPI_URL"]
 sample_news_json_name = os.path.join("sample_data", "sample_news_response.json")
 
 # function to find the file path and read the json file
@@ -19,27 +18,35 @@ def get_news_json_path():
 
 # PRODUCTION
 # @st.cache
-def get_news(query_str = ""):
-    try:
-        # Set and send an ngrok-skip-browser-warning request header with any value.
+def get_news(query = ""):
+    articles = []
+    if query.strip():
+        payload = {"query": query}
         news_curator_url = f"{SERPI_URL}/get_news"
         headers = {"ngrok-skip-browser-warning": "any_value"}
-        response = requests.get(news_curator_url, headers=headers)
-        response.raise_for_status()
-        articles = response.json()
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching articles: {e}")
-        articles = []
+        
+        try:
+            response = requests.get(news_curator_url, headers=headers, json=payload)
+            response.raise_for_status()
+            # Handling the response
+            if response.status_code == 200:
+                articles = response.json()
+            else:
+                articles = local_get_news()
+                # st.error(f"Error fetching articles: {e}")
+        except Exception as e:
+            articles = local_get_news()
+            # st.error(f"Failed to connect to the backend: {e}")
+    else:
+        articles = local_get_news()
+
     return articles
 
-
-
-# Testing for local 
 # comment in production
-# def get_news():
-#     with open(get_news_json_path(), "r") as f:
-#         articles = json.load(f)
-#     return articles
+def local_get_news():
+    with open(get_news_json_path(), "r") as f:
+        articles = json.load(f)
+    return articles
 
 
 
@@ -80,16 +87,18 @@ def display_row_news(articles = [], start_index = 0, articles_per_view = 3):
 
 def show_home_page(api_base_url=SERPI_URL):
     st.title(f"Welcome to Restaurant Business Assistant")
-    st.write(f"Curated news for you")
     
     news_curator = st.container(border=True)
     with news_curator:
         # query_str=st.text_input("Enter the query string")
-        articles = get_news()
+        query = st.text_input("Generate news curation on specific topic?", value="Latest small restaurant news in massachusetts") 
+        if st.button("Generate again"):
+            with st.spinner("...Curating news..."):
+                articles = get_news(query)
 
-        # Calculate the maximum starting index we can show without going out of range
-        import math
-        max_num_of_rows = max(1, math.ceil(len(articles) / articles_per_view))
-        for row_num in range(max_num_of_rows):
-            start_index = row_num * articles_per_view
-            display_row_news(articles, start_index, articles_per_view)
+                # Calculate the maximum starting index we can show without going out of range
+                import math
+                max_num_of_rows = max(1, math.ceil(len(articles) / articles_per_view))
+                for row_num in range(max_num_of_rows):
+                    start_index = row_num * articles_per_view
+                    display_row_news(articles, start_index, articles_per_view)
