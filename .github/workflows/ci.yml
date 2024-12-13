@@ -76,6 +76,8 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
           # Define variables
+          echo 'AFTER SSH'
+          pwd
           STREAMLIT_IMAGE=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}/streamlit-app:latest
           FASTAPI_IMAGE=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}/fastapi-app:latest
           STREAMLIT_PORT=8501
