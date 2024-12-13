@@ -1,28 +1,75 @@
 # damg7245_final_project/Application/streamlit/pagess/qn.py
-
 import streamlit as st
 import requests
+import os
+import json
+import math
+
+def clean_data_for_json(obj):
+    if isinstance(obj, float) and math.isnan(obj):
+        return None
+    return obj
 
 def show_qn_page(api_base_url, city):
-    st.title(f"In-depth Report on Opening a Restaurant in {city}")
+    st.title(f"In-depth Q&A & Business Planning Assistance for {city}")
 
-    # Here, you can use an LLM or a custom endpoint to generate a comprehensive report:
-    # - Competitor analysis
-    # - Menu recommendation
-    # - Legal regulation summary
-    # - Steps involved
-    # - Etc.
+    if 'token' not in st.session_state or not st.session_state.token:
+        st.error("Please log in to access Q&N page.")
+        return
 
-    # For now, just a placeholder:
-    if st.button("Generate In-Depth Report"):
-        report = generate_in_depth_report(api_base_url, city, st.session_state.token)
-        st.write(report)
+    # Remind user they can ask for detailed plans:
+    st.markdown("""
+    **Ask for a detailed business plan, comprehensive competitive analysis, or other restaurant-business-related questions.**  
+    For example:  
+    - "Give me a comprehensive competitive analysis of restaurants at my ZIP code."  
+    - "Help me prepare a detailed business plan to open a restaurant here."
+    """)
 
-def generate_in_depth_report(api_base_url, city, token):
-    headers = {"Authorization": f"Bearer {token}"} if token else {}
-    # Mock call to a backend endpoint:
-    # response = requests.post(f"{api_base_url}/generate_detailed_report", json={"city": city}, headers=headers)
-    # if response.status_code == 200:
-    #     return response.json()["report"]
+    restaurants_data = st.session_state.get("restaurants_for_qn", [])
+    zip_code = st.session_state.get("zip_code", "02115")
 
-    return f"**Detailed Report for {city}:**\n\n- Competitor Analysis: X number of restaurants...\n- Menu Recommendations: Consider vegetarian options...\n- Legal Regulations: Obtain a ServSafe certificate...\n- Steps: 1) Register your business 2) Obtain licenses..."
+    cleaned_restaurants_data = []
+    for r in restaurants_data:
+        new_r = {}
+        for k, v in r.items():
+            if isinstance(v, float) and math.isnan(v):
+                new_r[k] = None
+            else:
+                new_r[k] = v
+        cleaned_restaurants_data.append(new_r)
+
+    if "qn_history" not in st.session_state:
+        st.session_state["qn_history"] = []
+
+    user_input = st.text_input("Enter your query (e.g., 'Give me a detailed business plan for opening a restaurant'):")
+    if st.button("Send"):
+        if user_input.strip():
+            st.session_state["qn_history"].append(("You", user_input))
+            headers = {
+                "Authorization": f"Bearer {st.session_state.token}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "question": user_input,
+                "restaurants_data": cleaned_restaurants_data,
+                "zip_code": zip_code
+            }
+
+            json_payload = json.dumps(payload)
+
+            response = requests.post(
+                f"{api_base_url}/qn_agent", 
+                data=json_payload,
+                headers=headers
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                answer = data.get("answer", "No answer")
+                st.session_state["qn_history"].append(("Assistant", answer))
+            else:
+                st.session_state["qn_history"].append(("Assistant", f"Error: {response.text}"))
+
+    # Display conversation history
+    for speaker, msg in st.session_state["qn_history"]:
+        st.markdown(f"**{speaker}:** {msg}")

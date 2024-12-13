@@ -15,7 +15,8 @@ WORKDIR /app
 # Install dependencies for the part that needs llama-index-core and openai >= 1.1.0
 # COPY requirements1.txt .
 # RUN pip install --no-cache-dir -r requirements1.txt
-
+RUN pip install openai==0.28.0
+RUN pip install tavily-python==0.5.0
 COPY . .
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
