@@ -22,24 +22,24 @@ jobs:
           cd Application
           printf "%s" "${{ secrets.ENTIRE_ENV }}" > .env
 
-      - name: Docker Install
-        uses: docker-practice/actions-setup-docker@master
-        timeout-minutes: 12
+      # - name: Docker Install
+      #   uses: docker-practice/actions-setup-docker@master
+      #   timeout-minutes: 12
         
-      - name: Docker System Cleanup (Prevent Disk Space Errors)
-        run: |
-          docker system prune -af --volumes
-          docker builder prune --all --force
+      # - name: Docker System Cleanup (Prevent Disk Space Errors)
+      #   run: |
+      #     docker system prune -af --volumes
+      #     docker builder prune --all --force
 
 
-      - name: Docker Compose Build
-        run: |
-          cd Application
-          set -x
+      # - name: Docker Compose Build
+      #   run: |
+      #     cd Application
+      #     set -x
 
-          docker version
+      #     docker version
 
-          docker compose build
+      #     docker compose build
 
 
       - name: Configure AWS CLI 
@@ -52,15 +52,15 @@ jobs:
         run: |
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
-      - name: Tag and Push Docker Images to ECR  
-        run: |         
-          # Tag and push Streamlit app
-          docker tag streamlit-app:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:streamlit-app-latest
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:streamlit-app-latest
+      # - name: Tag and Push Docker Images to ECR  
+      #   run: |         
+      #     # Tag and push Streamlit app
+      #     docker tag streamlit-app:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:streamlit-app-latest
+      #     docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:streamlit-app-latest
 
-          # Tag and push FastAPI app
-          docker tag fastapi-app:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:fastapi-app-latest
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:fastapi-app-latest
+      #     # Tag and push FastAPI app
+      #     docker tag fastapi-app:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:fastapi-app-latest
+      #     docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:fastapi-app-latest
 
       - name: Create SSH Key File
         run: |
@@ -106,8 +106,8 @@ jobs:
 
           
 
-          docker run -d -p 8501:8501 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:streamlit-app-latest
-          docker run -d -p 8000:8000 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:fastapi-app-latest
+          docker run -d -p 8080:8501 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:streamlit-app-latest
+          docker run -d -p 4000:8000 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.MY_REPO }}:fastapi-app-latest
           EOF
           
         
