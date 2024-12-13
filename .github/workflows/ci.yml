@@ -62,7 +62,7 @@ jobs:
       - name: Create SSH Key File
         run: |
           echo "${{ secrets.EC2_KEY }}" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ubuntu@${{ secrets.EC2_PUBLIC_IP }} 
+          ssh -o StrictHostKeyChecking=no -i private_key ec2-user@$ip-172-31-18-124 
           # echo "${{ secrets.EC2_KEY }}" > private-key.pem
           # chmod 400 private-key.pem
 
