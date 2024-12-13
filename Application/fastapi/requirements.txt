@@ -11,9 +11,6 @@ python-multipart==0.0.16
 boto3
 python-dotenv==1.0.1
 pydantic
-llama-index
-transformers
-torch
 pdf2image
 pytesseract
 snowflake-connector-python==3.12.3
